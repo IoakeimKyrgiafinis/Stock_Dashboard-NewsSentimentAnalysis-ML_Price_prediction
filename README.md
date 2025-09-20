@@ -7,48 +7,49 @@ It works the following way:
       3. Using the same data, an XGBRegressor is implemented in an attempt to predict tommorow's "Close"
         price using stock trade volume and historical prices
         XGBRegressor is preffered over LogisticRegression in this case because of its ability to better
-        handle nonlinearity in TimeSeries which exists in this case (Financial Timeseries)
+        handle nonlinearity in TimeSeries which exists in this case (Financial Timeseries) <br/>
       4.At the same time feedparser is used to parse GoogleNewsRSS feed and textblob to perform sentiment
         analysis on the said feed. The result is a list of the 10 latest news and their polarity (whether 
-        they are negative or positive for the stock price)
+        they are negative or positive for the stock price) <br/>
 
 
 All these are then displayed on the home page of the dashboard to provide the user with some basic knowledge
-about the stock.
+about the stock. <br/>
     
-The Following modules are required for this app to function:
-      -flask
-      -os
-      -requests
-      -pandas
-      -dotenv
-      -xgboost
-      -textblob
-      -feedparser
-      -EOD Demo Api Key
-In order for the project to work the project path must be set like this: 
+The Following modules are required for this app to function:<br/>
+      -flask <br/>
+      -os <br/>
+      -requests <br/>
+      -pandas <br/>
+      -dotenv <br/>
+      -xgboost <br/> 
+      -textblob <br/>
+      -feedparser <br/>
+      -EOD Demo Api Key <br/>
+In order for the project to work the project path must be set like this: <br/>
 
-FlaskStockDashboardProject/
-├── mywebapp/
-│   ├── routes/
-│   │   ├── dashboard_routes.py
-│   │   └── home_routes.py
-│   ├── services/
-│   │   ├── news.py
-│   │   └── sentiment.py
-│   ├── static/
-│   │   └── css/
-│   │       └── dashboard.css
-│   ├── templates/
-│   │   ├── about.html
-│   │   ├── hello.html
-│   │   ├── home.html
-│   │   ├── layout.html
-│   │   ├── stocks_dashboard.html
-│   │   └── stocks_form.html
-│   ├── __init__.py
-│   └── predictor.py
-├── env/
-├── README.md      
+FlaskStockDashboardProject/ <br/>
+├── mywebapp/ <br/>
+│   ├── routes/ <br/>
+│   │   ├── dashboard_routes.py <br/>
+│   │   └── home_routes.py <br/>
+│   ├── services/ <br/>
+│   │   ├── news.py <br/>
+│   │   └── sentiment.py <br/>
+│   ├── static/ <br/>
+│   │   └── css/ <br/>
+│   │       └── dashboard.css <br/>
+│   ├── templates/ <br/>
+│   │   ├── about.html <br/>
+│   │   ├── hello.html <br/>
+│   │   ├── home.html <br/>
+│   │   ├── layout.html <br/>
+│   │   ├── stocks_dashboard.html <br/>
+│   │   └── stocks_form.html <br/>
+│   ├── __init__.py <br/>
+│   └── predictor.py <br/>
+├── env/ <br/>
+├── README.md <br/>      
           
+
 
