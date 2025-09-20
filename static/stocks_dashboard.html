@@ -1,0 +1,197 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-container">
+  <h2>Stock Dashboard</h2>
+
+  <!-- User input -->
+  <form id="stock-form">
+    <input type="text" id="stock-symbol" value="{{ symbol }}" placeholder="Enter stock symbol (e.g. TSLA)">
+    <button type="button" id="fetch-dashboard">Fetch Data</button>
+
+    <!-- Time Range Selector -->
+    <label for="time-range">Range:</label>
+    <select id="time-range">
+      <option value="1W">1 Week</option>
+      <option value="1M">1 Month</option>
+      <option value="1Y">1 Year</option>
+      <option value="10Y">10 Years</option>
+    </select>
+  </form>
+
+  <!-- Chart -->
+  <div class="dashboard-card">
+    <canvas id="stock-chart"></canvas>
+  </div>
+
+  <!-- Stock Data -->
+  <div class="dashboard-card" id="stock-data"></div>
+
+  <!-- Prediction Data -->
+  <div class="dashboard-card" id="prediction" style="display:none;"></div>
+
+  <!-- News Data -->
+  <div class="dashboard-card" id="news-panel">
+    <h3>Latest Stock News</h3>
+    <ul id="news-list"></ul>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let stockChart = null;
+
+    // Helper: filter data by range
+    function filterDataByRange(data, range) {
+        const today = new Date();
+        let cutoff;
+
+        switch (range) {
+            case "1W": cutoff = new Date(); cutoff.setDate(today.getDate() - 7); break;
+            case "1M": cutoff = new Date(); cutoff.setMonth(today.getMonth() - 1); break;
+            case "1Y": cutoff = new Date(); cutoff.setFullYear(today.getFullYear() - 1); break;
+            case "10Y": cutoff = new Date(); cutoff.setFullYear(today.getFullYear() - 10); break;
+            default: cutoff = null;
+        }
+
+        return data.filter(d => {
+            const date = new Date(d.date);
+            return !cutoff || date >= cutoff;
+        }).reverse();
+    }
+
+    async function fetchStockData(symbol) {
+        const res = await fetch(`/api/stocks?symbol=${symbol}`);
+        const data = await res.json();
+        const container = document.getElementById("stock-data");
+
+        if (!res.ok || !data.data || data.data.length === 0) {
+            container.innerHTML = `<p style="color:red">${data.error || "Could not fetch stock data."}</p>`;
+            if (stockChart) { stockChart.destroy(); stockChart = null; }
+            return;
+        }
+
+        container.innerHTML = `
+            <h3>${data.symbol} Latest Close</h3>
+            <p>${data.latest.timestamp}: ${data.latest.close}</p>
+        `;
+
+        // Apply range filter
+        const range = document.getElementById("time-range").value;
+        const filtered = filterDataByRange(data.data, range);
+
+        const labels = filtered.map(d => d.date);
+        const prices = filtered.map(d => d.close);
+
+        const ctx = document.getElementById("stock-chart").getContext("2d");
+        if (stockChart) stockChart.destroy();
+        stockChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: `${symbol} Closing Price`,
+                    data: prices,
+                    borderColor: "blue",
+                    fill: false,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { mode: "index", intersect: false }
+                },
+                scales: {
+                    x: { display: true, title: { display: true, text: "Date" } },
+                    y: { display: true, title: { display: true, text: "Price (USD)" } }
+                }
+            }
+        });
+    }
+
+    async function fetchNews(symbol) {
+        const res = await fetch(`/news?query=${symbol}`);
+        const data = await res.json();
+        const ul = document.getElementById("news-list");
+        ul.innerHTML = "";
+
+        if (res.ok) {
+            data.results.forEach(item => {
+                const li = document.createElement("li");
+                li.innerHTML = `<a href="${item.link}" target="_blank">${item.title}</a> — <strong>${item.sentiment.label}</strong>`;
+                ul.appendChild(li);
+            });
+        } else {
+            ul.innerHTML = `<li style="color:red">${data.error}</li>`;
+        }
+    }
+
+    document.getElementById("fetch-dashboard").addEventListener("click", () => {
+        const symbol = document.getElementById("stock-symbol").value.trim().toUpperCase();
+        if (!symbol) return alert("Please enter a stock symbol.");
+        fetchStockData(symbol);
+        fetchNews(symbol);
+    });
+
+    document.getElementById("time-range").addEventListener("change", () => {
+        const symbol = document.getElementById("stock-symbol").value.trim().toUpperCase();
+        if (symbol) fetchStockData(symbol);
+    });
+
+    // Auto-load from backend-provided symbol
+    window.addEventListener("DOMContentLoaded", () => {
+        const symbol = "{{ symbol }}";
+        fetchStockData(symbol);
+        fetchNews(symbol);
+    });
+
+    function loadLatestData(symbol) {
+    fetch(`/api/stocks?symbol=${symbol}`)
+      .then(res => res.json())
+      .then(data => {
+        const latestDiv = document.getElementById("latest");
+        if (data.error) {
+          latestDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
+        } else {
+          latestDiv.innerHTML = `
+            <p><strong>Latest Date:</strong> ${data.latest.timestamp}</p>
+            <p><strong>Latest Close:</strong> ${data.latest.close}</p>
+          `;
+        }
+      });
+  }
+
+  // 🔹 New function for prediction
+  function loadPrediction(symbol) {
+    fetch(`/api/predict?symbol=${symbol}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          console.error(data.error);
+        } else {
+          const div = document.getElementById("prediction");
+          div.style.display = "block";
+          div.innerHTML = `
+            <p><strong>Predicted Date:</strong> ${data.predicted_date}</p>
+            <p><strong>Predicted Close:</strong> $${data.predicted_next_close}</p>
+            <p><small>Last available data: ${data.last_date_in_data}</small></p>
+          `;
+        }
+      });
+  }
+
+  // 🔹 Call both when page loads
+  document.addEventListener("DOMContentLoaded", function() {
+    const symbol = "{{ symbol }}";
+    loadLatestData(symbol);
+    loadPrediction(symbol);
+  });
+
+
+
+
+</script>
+{% endblock %}
