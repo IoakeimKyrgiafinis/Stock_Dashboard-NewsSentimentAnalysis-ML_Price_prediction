@@ -1,9 +1,9 @@
 This python webapp which uses Flask for BackEnd and HTML/CSS for FrontEnd. 
 
 It works the following way:
-      1. Fetches stock data using EOD's Demo Api Key (STOCK SYMBOL = "MCD" )
+      1. Fetches stock data using EOD's Demo Api Key (STOCK SYMBOL = "MCD" ) <br/>
       2.This data is used to create a typical Stock Close Price dashboard to provide the user with
-        basic historical price movement information
+        basic historical price movement information <br/>
       3. Using the same data, an XGBRegressor is implemented in an attempt to predict tommorow's "Close"
         price using stock trade volume and historical prices
         XGBRegressor is preffered over LogisticRegression in this case because of its ability to better
@@ -51,3 +51,4 @@ FlaskStockDashboardProject/
 ├── env/
 ├── README.md      
           
+
