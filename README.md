@@ -1,4 +1,4 @@
-This python webapp which uses Flask for BackEnd and HTML/CSS for FrontEnd. 
+This Python webapp uses Flask for BackEnd and HTML/CSS for FrontEnd. 
 
 It works the following way:
       1. Fetches stock data using EOD's Demo Api Key (STOCK SYMBOL = "MCD" ) <br/>
