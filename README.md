@@ -5,9 +5,8 @@ It works the following way:
       2.This data is used to create a typical Stock Close Price dashboard to provide the user with
         basic historical price movement information <br/>
       3. Using the same data, an XGBRegressor is implemented in an attempt to predict tommorow's "Close"
-        price using stock trade volume and historical prices
-        XGBRegressor is preffered over LogisticRegression in this case because of its ability to better
-        handle nonlinearity in TimeSeries which exists in this case (Financial Timeseries) <br/>
+        price using stock trade volume and historical prices.
+        <br/>
       4.At the same time feedparser is used to parse GoogleNewsRSS feed and textblob to perform sentiment
         analysis on the said feed. The result is a list of the 10 latest news and their polarity (whether 
         they are negative or positive for the stock price) <br/>
